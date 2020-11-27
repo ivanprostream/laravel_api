@@ -29,8 +29,8 @@ class WalletController extends Controller
         $wallets = $this->user->wallets()->get(['id', 'name', 'amount', 'created_by']);
 
         return response()->json([
-                    'wallets' => $wallets->toArray(),
-                ], 200);
+            'wallets' => $wallets->toArray(),
+        ], 200);
     }
 
     /**
@@ -55,7 +55,7 @@ class WalletController extends Controller
 
             $wallet = new Wallet();
             $wallet->name   = $request->name;
-            $wallet->amount = 1;
+            $wallet->amount = 100000000;
 
             if($this->user->wallets()->save($wallet)){
                 return response()->json([
@@ -88,7 +88,8 @@ class WalletController extends Controller
     {
          return response()->json([
             'wallet' => $wallet->toArray(),
-            'convertTo' => $this->convertBTCto($wallet->amount, "USD")
+            'convertToUSD' => convertTo($wallet->amount, "USD"),
+            'convertToBTC' => convertToBtc($wallet->amount, "USD")
         ], 200);   
     }
 
@@ -153,27 +154,12 @@ class WalletController extends Controller
 
     public function transactions($id)
     {
-        $transactions = Transaction::findOrFail($id);
+        $transactions = Transaction::where('wallet_id', $id);
         return response()->json([
             'message' => 'Transactions by wallet',
             'transactions' => $transactions
         ]);
     }
-
-    // CRON and save in Setting->conversion
-
-    public function convertBTCto($amount, $currency)
-    {
-        $data = file_get_contents("https://bitpay.com/api/rates");
-        $json = json_decode($data, true);
-        foreach ($json as $value) {
-            if($value->code == $currency){
-                return $amount.' bitcoins = '.$amount * $value->rate.' '.$currency;
-            }
-        }
-
-    }
-
 
     public function guard()
     {

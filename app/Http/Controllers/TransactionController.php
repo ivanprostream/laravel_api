@@ -65,7 +65,7 @@ class TransactionController extends Controller
 
         $amount = $walletFrom->amount;
 
-        if(!empty($walletFrom) && !empty($walletTo) && $requestData['amount'] <= $amount){
+        if(!empty($walletFrom) && !empty($walletTo) && $requestData['amount'] <= calculateSummWithFee($amount)) {
             $this->createTransaction($walletFrom, $walletTo, $requestData['amount']);
         }else{
             return response()->json([
@@ -79,94 +79,102 @@ class TransactionController extends Controller
     {
         if($from->created_by == $this->user->id && $from->created_by == $to->created_by)
         {
-            DB::beginTransaction();
-            try {
-                
-                $transaction = new Transaction();
-                $transaction->created_by = $from->created_by;
-                $transaction->wallet_id = $to->id;
-                $transaction->amount = $amount;
-                $transaction->save();
+            $this->createTransactionWithoutFee($from, $to, $amount);  
 
-                $walletFrom = Wallet::findOrFail($from->id);
-
-                $summFrom = $walletFrom->amount;
-
-                $walletFrom->amount = $summFrom - $amount;
-                $walletFrom->save();
-
-                $walletTo = Wallet::findOrFail($to->id);
-
-                $summTo = $walletTo->amount;
-
-                $walletTo->amount = $summTo + $amount;
-                $walletTo->save();
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Transaction done',
-                    'transaction' => $transaction
-                ], 200);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                return $e->getMessage();
-            }
         }elseif($from->created_by == $this->user->id && $from->created_by != $to->created_by){
 
-            $fee = 1.5 * $amount / 100;
-            $amount_to = $amount;
-            $summ = $amount_to - $fee;
-            $total_fee = $fee;
-
-            DB::beginTransaction();
-            try {
-
-                $transaction = new Transaction();
-                $transaction->created_by = $from->created_by;
-                $transaction->wallet_id = $to->id;
-                $transaction->amount = $summ;
-                $transaction->save();
-
-
-                $walletFrom = Wallet::findOrFail($from->id);
-
-                $summFrom = $walletFrom->amount;
-
-                $walletFrom->amount = $summFrom - $amount_to;
-                $walletFrom->save();
-
-                $walletTo = Wallet::findOrFail($to->id);
-
-                $summTo = $walletTo->amount;
-
-                $walletTo->amount = $summTo + $summ;
-                $walletTo->save();
-
-                $transaction_id = $transaction->id;
-
-                $fee = new Fee();
-                $fee->transaction_id = $transaction_id;
-                $fee->amount = $total_fee;
-                $fee->save();
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Transaction done',
-                    'transaction' => $transaction
-                ], 200);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                return $e->getMessage();
-            }
+            $this->createTransactionWithFee($from, $to, $amount);
         }
-
-        //return response()->json($transaction, 201);
     }
 
+    public function createTransactionWithoutFee($from, $to, $amount)
+    {
+        $totalSumm = $amount;
+
+        DB::beginTransaction();
+        try {
+
+            $walletFrom = Wallet::findOrFail($from->id);
+
+            $summFrom = $walletFrom->amount;
+
+            $walletFrom->amount = $summFrom - $amount;
+            $walletFrom->save();
+
+            $walletTo = Wallet::findOrFail($to->id);
+
+            $summTo = $walletTo->amount;
+
+            $walletTo->amount = $summTo + $amount;
+            $walletTo->save();
+
+            $transaction = new Transaction();
+            $transaction->created_by = $from->created_by;
+            $transaction->wallet_id = $to->id;
+            $transaction->amount = $amount;
+            $transaction->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Transaction done',
+                'transaction' => $transaction
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $e->getMessage();
+        }
+    }
+
+    public function createTransactionWithFee($from, $to, $amount)
+    {
+        $totalSumm = $amount;
+
+        $summWithFee = calculateSummWithFee($amount);
+
+        $fee = $summWithFee - $amount;
+
+        DB::beginTransaction();
+        try {
+
+            $walletFrom = Wallet::findOrFail($from->id);
+
+            $summFrom = $walletFrom->amount;
+
+            $walletFrom->amount = $summFrom - $summWithFee;
+            $walletFrom->save();
+
+            $walletTo = Wallet::findOrFail($to->id);
+
+            $summTo = $walletTo->amount;
+
+            $walletTo->amount = $summTo + $totalSumm;
+            $walletTo->save();
+
+            $transaction = new Transaction();
+            $transaction->created_by = $from->created_by;
+            $transaction->wallet_id = $to->id;
+            $transaction->amount = $totalSumm;
+            $transaction->save();
+
+            $fee = new Fee();
+            $fee->transaction_id = $transaction->id;
+            $fee->amount = getFeeFromSumm($amount);
+            $fee->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Transaction done',
+                'transaction' => $transaction
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return $e->getMessage();
+        }
+    }
 
     public function guard()
     {

@@ -39,9 +39,9 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
 
     }
+    
 
-
-    public function register(Request $request)
+    public function users(Request $request)
     {
         $validator = Validator::make(
             $request->all(),
