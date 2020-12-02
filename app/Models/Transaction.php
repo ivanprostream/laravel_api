@@ -10,9 +10,8 @@ class Transaction extends Model
     use HasFactory;
 
     protected $table = "transactions";
-    public $timestamps = true;
 
     protected $fillable = [
-        'amount', 'wallet_id', 'amount'
+        'amount', 'wallet_id'
     ];
 }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\ConvertionStoreRequest;
 use Illuminate\Http\Request;
 
 class ConvertionController extends Controller
@@ -15,18 +15,8 @@ class ConvertionController extends Controller
 	 *
 	 */
 
-	function saveBtcRate(Request $request)
+	function saveBtcRate(ConvertionSaveBtsRequest $request)
 	{
-		$validator = Validator::make($request->all(), [
-            'currency' => 'required|string'
-        ]);
-
-        if($validator->fails()){
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 400);
-        }
 
         $currency = $request->currency;
 

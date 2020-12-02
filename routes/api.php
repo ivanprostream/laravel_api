@@ -22,7 +22,6 @@ Route::group(
     ],
     function ($router) {
         Route::post('login', 'AuthController@login');
-        Route::post('users', 'AuthController@users');
         Route::post('logout', 'AuthController@logout');
         Route::get('profile', 'AuthController@profile');
         Route::post('refresh', 'AuthController@refresh');
@@ -40,5 +39,9 @@ Route::group(
         Route::get('wallets/{wallet}/transactions', 'WalletController@transactions');
         Route::get('fee_list', 'FeeController@index');
         Route::post('save_btc_rate', 'ConvertionController@saveBtcRate');
+        Route::post('test_form', 'FeeController@test_form');
+        Route::post('users', 'UserController@store');
+
+
     }
 );

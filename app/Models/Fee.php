@@ -10,7 +10,6 @@ class Fee extends Model
     use HasFactory;
 
     protected $table = "fees";
-
     protected $fillable = ["amount", "transaction_id"];
 
 }

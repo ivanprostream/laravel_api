@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Http\Requests\AuthRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+
 
 class AuthController extends Controller
 {
@@ -14,62 +14,21 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
-    public function login(Request $request)
+    public function login(AuthRequest $request)
     {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'email'    => 'required|email',
-                'password' => 'required|string|min:3',
-            ]
-        );
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
+        $validatedData = $request->validated();
 
         $token_validity = (24 * 60);
 
         $this->guard()->factory()->setTTL($token_validity);
 
-        if (!$token = $this->guard()->attempt($validator->validated())) {
+        if (!$token = $this->guard()->attempt($validatedData)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         return $this->respondWithToken($token);
 
     }
-    
-
-    public function users(Request $request)
-    {
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'name'     => 'required|string',
-                'email'    => 'required|email|unique:users',
-                'password' => 'required|min:3',
-            ]
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                [$validator->errors()],
-                422
-            );
-        }
-
-        $user = User::create(
-            array_merge(
-                $validator->validated(),
-                ['password' => bcrypt($request->password)]
-            )
-        );
-
-        return response()->json(['message' => 'User created successfully', 'user' => $user]);
-
-    }
-
 
     public function logout()
     {
@@ -102,7 +61,6 @@ class AuthController extends Controller
                 'token_validity' => ($this->guard()->factory()->getTTL() * 60),
             ]
         );
-
     }
 
 
