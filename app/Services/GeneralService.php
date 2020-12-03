@@ -29,34 +29,5 @@ class GeneralService
         $convertToBtc = $amount / 100000000;
         return $amount.' Satoshi = '.$convertToBtc.' Bitcoins';
     }
-
-    /**
-     * Calculate Summ with fee 
-     *
-     * @param $amount
-     * @return string
-     */
-
-    function calculateSummWithFee($amount)
-    {
-        $fee = Setting::first();
-        $FeeFromSumm = $amount * $fee->fee / 100;
-
-        return $amount + $FeeFromSumm;
-    }
-
-    /**
-     * get Fee from summ
-     *
-     * @param $amount
-     * @return string
-     */
-
-    function getFeeFromSumm($amount)
-    {
-        $fee = Setting::first();
-        $FeeFromSumm = $amount * $fee->fee / 100;
-
-        return $FeeFromSumm;
-    }
+    
 }

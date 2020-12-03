@@ -6,21 +6,16 @@ use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Validation\Rule;
 
-
-class WalletLimitTen implements Rule
+class WalletIssetToUser implements Rule
 {
-    // protected $user;
-    private $max_count;
-
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($max_count = 10)
+    public function __construct()
     {
-        $this->max_count = $max_count;
-        $this->user = Auth::user()->id;
+        //
     }
 
     /**
@@ -32,7 +27,7 @@ class WalletLimitTen implements Rule
      */
     public function passes($attribute, $value)
     {
-        if(Wallet::where('created_by', $this->user)->count() < $this->max_count){
+        if(Wallet::where('created_by', Auth::user()->id)->where('id', $value)->firstOrFail()){
             return true;
         }
         return false;
@@ -45,6 +40,6 @@ class WalletLimitTen implements Rule
      */
     public function message()
     {
-        return 'You may save only '.$this->max_count.' wallets';
+        return 'This wallet or user is not exist';
     }
 }

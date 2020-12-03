@@ -6,13 +6,25 @@ use Illuminate\Foundation\Http\FormRequest;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Rules\WalletIssetToUser;
+use App\Rules\WalletIsset;
 
-class UserFormRequest extends FormRequest
+class TransactionRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json($validator->errors(), 422));
     }
+
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    // public function authorize()
+    // {
+    //     return true;
+    // }
 
     /**
      * Get the validation rules that apply to the request.
@@ -22,9 +34,9 @@ class UserFormRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'     => 'required|string',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|min:3',
+            'wallet_from'  => ['required', new WalletIssetToUser()], //,
+            'wallet_to'    => ['required', new WalletIsset()],
+            'summ'         => 'required|integer',
         ];
     }
 }

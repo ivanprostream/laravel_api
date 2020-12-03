@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\TransactionStoreRequest;
+use App\Http\Requests\TransactionRequest;
 use App\Http\Resources\TransactionResource;
+use App\Http\Resources\TransactionStoreResource;
+use App\Services\TransactionService;
 
 class TransactionController extends Controller
 {
 
-    protected $user;
+    private $transactionService;
 
-    public function __construct()
+    public function __construct( transactionService $transactionService )
     {
         $this->middleware('auth:api');
         $this->user = $this->guard()->user();
+
+        $this->transactionService = $transactionService;
     }
 
     /**
@@ -30,7 +34,6 @@ class TransactionController extends Controller
         }else{
             return new RowNotFindResource($transactions);
         }
-
     }
 
     /**
@@ -39,12 +42,11 @@ class TransactionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // public function store(TransactionStoreRequest $request)
-    // {
-
-    //     $transactionStore =  $this->transactionService->transactionStore($request, $this->user->id);
-    //     return $transactionStore;
-    // }
+    public function store(TransactionRequest $request)
+    {
+        $transactionStore =  $this->transactionService->transactionStore($request, $this->user->id);
+        return new TransactionStoreResource($transactionStore);
+    }
 
     public function guard()
     {

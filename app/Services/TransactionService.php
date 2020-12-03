@@ -8,81 +8,83 @@ use App\Models\Wallet;
 use App\Models\Fee;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
-use App\Services\GeneralService;
-
+use App\Exceptions\InsufficientBalanceException;
 
 class TransactionService
 {
     public function transactionStore($request, $user)
     {
-        $walletFrom  = Wallet::where('id', $request['wallet_from'])->where('created_by', $user)->firstOrFail();
-        $walletTo    = Wallet::where('id', $request['wallet_to'])->firstOrFail();
-
-        $amount = $walletFrom->amount;
-        $calculateSummWithFee = $this->walletService->calculateSummWithFee($amount);
-
-        $totalSumm = $amount;
 
         DB::beginTransaction();
+
         try {
+            $typeTransfer = 0;
+            $fromQuery = Wallet::where('id', $request['wallet_from'])->lockForUpdate()->first();
+            $toQuery = Wallet::where('id', $request['wallet_to'])->lockForUpdate()->first();
 
-            if($request['amount'] <= $calculateSummWithFee) {
-
-                $transaction = new Transaction();
-                $transaction->created_by = $walletFrom->created_by;
-                $transaction->wallet_id = $walletTo->id;
-                $transaction->amount = $amount;
-                $transaction->save();
-
-                if($walletFrom->id == $walletTo->id){
-                    $walletFrom = Wallet::findOrFail($walletFrom->id);
-
-                    $summFrom = $walletFrom->amount;
-
-                    $walletFrom->amount = $summFrom - $amount;
-                    $walletFrom->save();
-
-                    $walletTo = Wallet::findOrFail($walletTo->id);
-
-                    $summTo = $walletTo->amount;
-
-                    $walletTo->amount = $summTo + $amount;
-                    $walletTo->save();
-                }else{
-                    $walletFrom = Wallet::findOrFail($walletFrom->id);
-
-                    $summFrom = $walletFrom->amount;
-
-                    $walletFrom->amount = $summFrom - $summWithFee;
-                    $walletFrom->save();
-
-                    $walletTo = Wallet::findOrFail($to->id);
-
-                    $summTo = $walletTo->amount;
-
-                    $walletTo->amount = $summTo + $totalSumm;
-                    $walletTo->save();
-
-                    $fee = new Fee();
-                    $fee->transaction_id = $transaction->id;
-                    $fee->amount = getFeeFromSumm($amount);
-                    $fee->save();
-                }
-
-                return response()->json([
-                    'message' => 'Transaction done',
-                    'transaction' => $transaction
-                ], 200);
-
-                DB::commit();
-
+            if($fromQuery->created_by == $toQuery->created_by){
+                $typeTransfer = 1;
+                $amount = $request['summ'];
+            }else{
+                $typeTransfer = 2;
+                $amount = $this->calculateSummWithFee($request['summ']);
             }
+
+            if($amount > $fromQuery->amount){
+                throw new InsufficientBalanceException();
+            }
+
+            $toAccount = $toQuery;
+            $toAccount->amount += $amount;
+            $toAccount->save();
+
+            $fromAccount = $fromQuery;
+            $fromAccount->amount -= $amount;
+            $fromAccount->save();
+
+            $transaction = new Transaction();
+            $transaction->created_by = $fromQuery->created_by;
+            $transaction->wallet_id = $toQuery->id;
+            $transaction->amount = $amount;
+            $transaction->save();
+
+            if($typeTransfer == 2){
+                $fee = new Fee();
+                $fee->transaction_id = $transaction->id;
+                $fee->amount = $this->getFeeFromSumm($amount);
+                $fee->save();
+            }
+
+            DB::commit();
 
         } catch (\Exception $e) {
             DB::rollback();
             return $e->getMessage();
         }
-    }    
+
+    }
+
+    public function calculateSummWithFee($amount)
+    {
+        $fee = Setting::first();
+        $FeeFromSumm = $amount * $fee->fee / 100;
+
+        return $amount + $FeeFromSumm;
+    }
+
+    /**
+     * get Fee from summ
+     *
+     * @param $amount
+     * @return string
+     */
+
+    function getFeeFromSumm($amount)
+    {
+        $fee = Setting::first();
+        $FeeFromSumm = $amount * $fee->fee / 100;
+
+        return $FeeFromSumm;
+    }
 
 }

@@ -34,7 +34,8 @@ Route::group(
         'namespace'  => 'App\Http\Controllers',
     ],
     function ($router) {
-        Route::resource('transactions', 'TransactionController');
+        Route::get('transactions', 'TransactionController@index');
+        Route::post('transactions', 'TransactionController@store');
         Route::resource('wallets', 'WalletController');
         Route::get('wallets/{wallet}/transactions', 'WalletController@transactions');
         Route::get('fee_list', 'FeeController@index');
