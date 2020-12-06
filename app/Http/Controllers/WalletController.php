@@ -31,7 +31,7 @@ class WalletController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): object
+    public function index() : object
     {
         $wallets = $this->walletService->walletList();
         return new WalletListResource($wallets);
@@ -43,9 +43,9 @@ class WalletController extends Controller
      * @param  \Illuminate\Http\Requests\WalletRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(WalletFormRequest $request)
+    public function store(WalletFormRequest $request) : void
     {   
-        return $this->walletService->walletStore($request);
+        $this->walletService->walletStore($request);
     }
 
     /**
@@ -54,7 +54,7 @@ class WalletController extends Controller
      * @param  \App\Models\Wallet  $wallet
      * @return \Illuminate\Http\Response
      */
-    public function show(Wallet $wallet) : object
+    public function show(Wallet $wallet): object
     {
         return new WalletShowResource($wallet);
     }
@@ -66,9 +66,9 @@ class WalletController extends Controller
      * @param  \App\Models\Wallet  $wallet
      * @return \Illuminate\Http\Response
      */
-    public function update(WalletItemRequest $request, Wallet $wallet)
+    public function update(WalletItemRequest $request, Wallet $wallet): void
     {
-        return $this->walletService->walletUpdate($request, $wallet);
+        $this->walletService->walletUpdate($request, $wallet);
     }
 
     /**
@@ -77,13 +77,13 @@ class WalletController extends Controller
      * @param  \App\Models\Wallet  $wallet
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Wallet $wallet)
+    public function destroy(Wallet $wallet): void
     {
-        return $this->walletService->walletDestroy($wallet->delete());
+        $this->walletService->walletDestroy($wallet->delete());
     }
 
 
-    public function transactions(int $id) : object
+    public function transactions(int $id): object
     {
         return $this->walletService->TransactionsByWallet($id);
     }

@@ -12,7 +12,7 @@ use App\Exceptions\InsufficientBalanceException;
 
 class TransactionService
 {
-    public function transactionStore($request, $user)
+    public function transactionStore($request, $user): void
     {
 
         DB::beginTransaction();

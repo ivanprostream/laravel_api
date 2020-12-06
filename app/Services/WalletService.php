@@ -12,7 +12,7 @@ use App\Http\Resources\WalletTransactionResource;
 class WalletService
 {
 
-    public function walletList() : object
+    public function walletList(): object
     {
         return Wallet::where('created_by', Auth::user()->id)->get();
     }
@@ -28,21 +28,20 @@ class WalletService
         }
     }
 
-    public function walletUpdate($request, $wallet)
+    public function walletUpdate($request, $wallet): void
     {
         $wallet = Wallet::firstOrFail($wallet);
         $wallet->save($request->only('name'));
-        return new WalletStoreResource($wallet);
     }
 
-    public function walletDestroy($wallet)
+    public function walletDestroy($wallet): void
     {
         if($wallet->created_by == Auth::user()->id){
             $wallet->delete();
         }
     }
 
-    public function TransactionsByWallet($id)
+    public function TransactionsByWallet($id): object
     {
         $transactions = Transaction::where('wallet_id', $id)->where('created_by', Auth::user()->id)->get();
         return new WalletTransactionResource($transactions);

@@ -15,7 +15,7 @@ class ConvertionController extends Controller
 	 *
 	 */
 
-	function saveBtcRate(ConvertionSaveBtsRequest $request)
+	function saveBtcRate(ConvertionSaveBtsRequest $request): void
 	{
 
         $currency = $request->currency;
@@ -39,9 +39,5 @@ class ConvertionController extends Controller
 	          
 	        }
 	    }
-
-	    return response()->json([
-            'message' => 'Convertion rate updated'
-        ], 200);
 	}
 }

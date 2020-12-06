@@ -27,7 +27,7 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() : object
+    public function index(): object
     {
         $transactions = Transaction::paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
         new TransactionResource($transactions);
@@ -39,10 +39,9 @@ class TransactionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(TransactionRequest $request)
+    public function store(TransactionRequest $request): void
     {
-        $transactionStore =  $this->transactionService->transactionStore($request, $this->user->id);
-        return new TransactionStoreResource($transactionStore);
+        $this->transactionService->transactionStore($request, $this->user->id);
     }
 
     public function guard()

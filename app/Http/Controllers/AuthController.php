@@ -14,7 +14,7 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
-    public function login(AuthRequest $request) : array
+    public function login(AuthRequest $request): object
     {
         $validatedData = $request->validated();
 
@@ -30,7 +30,7 @@ class AuthController extends Controller
 
     }
 
-    public function logout()
+    public function logout(): object
     {
         $this->guard()->logout();
 
@@ -38,21 +38,21 @@ class AuthController extends Controller
     }
 
 
-    public function profile() : object
+    public function profile(): object
     {
         return response()->json($this->guard()->user());
 
     }
 
 
-    public function refresh()
+    public function refresh(): string
     {
         return $this->respondWithToken($this->guard()->refresh());
 
     }
 
 
-    protected function respondWithToken($token)
+    protected function respondWithToken($token): array
     {
         return response()->json(
             [

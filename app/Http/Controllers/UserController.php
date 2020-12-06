@@ -17,9 +17,8 @@ class UserController extends Controller
 		$this->userService = $userService;
 	}
 
-    public function store(UserFormRequest $request)
+    public function store(UserFormRequest $request): void
     {
-        $userStore =  $this->userService->createUser($request);
-        return new UserStoreResource($userStore);
+        $this->userService->createUser($request);
     }
 }
