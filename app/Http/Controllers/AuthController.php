@@ -14,7 +14,7 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
-    public function login(AuthRequest $request)
+    public function login(AuthRequest $request) : array
     {
         $validatedData = $request->validated();
 
@@ -38,7 +38,7 @@ class AuthController extends Controller
     }
 
 
-    public function profile()
+    public function profile() : object
     {
         return response()->json($this->guard()->user());
 

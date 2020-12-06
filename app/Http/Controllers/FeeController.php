@@ -14,7 +14,7 @@ class FeeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index() : object
     {
         $fee_list = Fee::all();
 
@@ -23,29 +23,5 @@ class FeeController extends Controller
             'fee_list' => $fee_list
         ], 200);
     }
-
-
-    public function test_form(WalletStoreRequest $request)
-    {
-        //print_r($request->all());
-        $validated = $request->validated();
-        print_r($validated);
-        // $validator = Validator::make($request->all(), [
-        //     'name' => 'required|string|max:50',
-        //     'message' => 'required|string|max:50'
-        // ]);
-
-        // if($validator->fails()){
-        //     return response()->json([
-        //         'status' => false,
-        //         'errors' => $validator->errors()
-        //     ], 400);
-        // }
-
-        // return response()->json([
-        //     'message' => 'Test Form'
-        // ], 200);
-    }
-
     
 }

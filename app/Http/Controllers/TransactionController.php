@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TransactionRequest;
 use App\Http\Resources\TransactionResource;
@@ -26,14 +27,10 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index() : object
     {
-        $transactions = $this->user->transactions()->get(['id', 'created_by', 'wallet_id', 'amount', 'created_by'])->toArray();;
-        if(!empty($transactions)){
-            return new TransactionResource($transactions);
-        }else{
-            return new RowNotFindResource($transactions);
-        }
+        $transactions = Transaction::paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
+        new TransactionResource($transactions);
     }
 
     /**

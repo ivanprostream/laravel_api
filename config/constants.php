@@ -2,7 +2,8 @@
 
 return [
 	'MAX_WALLET_COUNT' => 10,
-	'START_AMOUNT' => 100000000
+	'START_AMOUNT' => 100000000,
+	'PAGINATION_PER_PAGE' => 5
 ];
 
 ?>

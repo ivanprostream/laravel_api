@@ -11,48 +11,41 @@ use App\Http\Resources\WalletTransactionResource;
 
 class WalletService
 {
-    public function walletStore($request, $user)
+
+    public function walletList() : object
     {
-        $wallet = new Wallet();
-        $wallet->name   = $request->name;
-        $wallet->amount = \Config::get('constants.START_AMOUNT');
+        return Wallet::where('created_by', Auth::user()->id)->get();
+    }
 
-        if($user->wallets()->save($wallet)){
+    public function walletStore($request)
+    {
+        if(Wallet::where('created_by', Auth::user()->id)->count() < \Config::get('constants.MAX_WALLET_COUNT')){
+            $wallet = Wallet::create(
+                $request->only('name'),
+                ['amount' => \Config::get('constants.START_AMOUNT')]
+            );
             return new WalletStoreResource($wallet);
-        }else{
-            return response()->json([
-                'message' => 'The wallet could not be saved'
-            ], 400);
         }
-
     }
 
     public function walletUpdate($request, $wallet)
     {
-        if($this->user->wallets()->save($request->all())){
-            return new WalletStoreResource($wallet);
-        }else{
-            return new RowNotFindResource($wallet);
-        }
+        $wallet = Wallet::firstOrFail($wallet);
+        $wallet->save($request->only('name'));
+        return new WalletStoreResource($wallet);
     }
 
     public function walletDestroy($wallet)
     {
-        if($wallet->delete()){
-            return new WalletStoreResource($wallet);
-        }else{
-            return new RowNotFindResource($wallet);
+        if($wallet->created_by == Auth::user()->id){
+            $wallet->delete();
         }
     }
 
     public function TransactionsByWallet($id)
     {
-        $transactions = Transaction::where('wallet_id', $id)->where('created_by', Auth::user()->id)->get()->toArray();
-        if(!empty($transactions)){
-            return new WalletTransactionResource($transactions);
-        }else{
-            return new RowNotFindResource($transactions);
-        }
+        $transactions = Transaction::where('wallet_id', $id)->where('created_by', Auth::user()->id)->get();
+        return new WalletTransactionResource($transactions);
 
     }
 

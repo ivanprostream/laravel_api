@@ -12,6 +12,6 @@ class Transaction extends Model
     protected $table = "transactions";
 
     protected $fillable = [
-        'amount', 'wallet_id'
+        'wallet_id'
     ];
 }

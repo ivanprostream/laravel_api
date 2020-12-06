@@ -10,11 +10,10 @@ class UserService
 	{
 		$user = User::create(
             array_merge(
-                $request->all(),
+                $request->only('email', 'password', 'name'),
                 ['password' => bcrypt($request->password)]
             )
         );
-
         return $user;
 	}
 }

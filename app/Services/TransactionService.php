@@ -18,15 +18,15 @@ class TransactionService
         DB::beginTransaction();
 
         try {
-            $typeTransfer = 0;
-            $fromQuery = Wallet::where('id', $request['wallet_from'])->lockForUpdate()->first();
-            $toQuery = Wallet::where('id', $request['wallet_to'])->lockForUpdate()->first();
+            $transferFee = false;
+            $fromQuery = Wallet::where('id', $request['wallet_from'])->where('created_by', Auth::user()->id)->lockForUpdate()->firstOrFail();
+            $toQuery = Wallet::where('id', $request['wallet_to'])->first();
 
             if($fromQuery->created_by == $toQuery->created_by){
-                $typeTransfer = 1;
+                $transferFee = false;
                 $amount = $request['summ'];
             }else{
-                $typeTransfer = 2;
+                $transferFee = true;
                 $amount = $this->calculateSummWithFee($request['summ']);
             }
 
@@ -34,13 +34,8 @@ class TransactionService
                 throw new InsufficientBalanceException();
             }
 
-            $toAccount = $toQuery;
-            $toAccount->amount += $amount;
-            $toAccount->save();
-
-            $fromAccount = $fromQuery;
-            $fromAccount->amount -= $amount;
-            $fromAccount->save();
+            $toQuery->increment('amount', $amount);
+            $fromQuery->decrement('amount' , $amount); 
 
             $transaction = new Transaction();
             $transaction->created_by = $fromQuery->created_by;
@@ -48,11 +43,13 @@ class TransactionService
             $transaction->amount = $amount;
             $transaction->save();
 
-            if($typeTransfer == 2){
-                $fee = new Fee();
-                $fee->transaction_id = $transaction->id;
-                $fee->amount = $this->getFeeFromSumm($amount);
-                $fee->save();
+            if($transferFee == true){
+                Fee::create(
+                    array_merge(
+                        $request->only('transaction_id'),
+                        ['amount' => $this->getFeeFromSumm($amount)]
+                    )
+                );
             }
 
             DB::commit();
@@ -64,7 +61,7 @@ class TransactionService
 
     }
 
-    public function calculateSummWithFee($amount)
+    public function calculateSummWithFee($amount) : int
     {
         $fee = Setting::first();
         $FeeFromSumm = $amount * $fee->fee / 100;
@@ -79,7 +76,7 @@ class TransactionService
      * @return string
      */
 
-    function getFeeFromSumm($amount)
+    function getFeeFromSumm($amount) : int
     {
         $fee = Setting::first();
         $FeeFromSumm = $amount * $fee->fee / 100;

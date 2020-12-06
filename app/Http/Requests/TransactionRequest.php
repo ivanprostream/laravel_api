@@ -34,8 +34,8 @@ class TransactionRequest extends FormRequest
     public function rules()
     {
         return [
-            'wallet_from'  => ['required', new WalletIssetToUser()], //,
-            'wallet_to'    => ['required', new WalletIsset()],
+            'wallet_from'  => 'required|exists:wallets,id', //,
+            'wallet_to'    => 'required|exists:wallets,id',
             'summ'         => 'required|integer',
         ];
     }

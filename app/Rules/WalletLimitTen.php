@@ -32,10 +32,7 @@ class WalletLimitTen implements Rule
      */
     public function passes($attribute, $value)
     {
-        if(Wallet::where('created_by', $this->user)->count() < $this->max_count){
-            return true;
-        }
-        return false;
+        return (Wallet::where('created_by', $this->user)->count() < $this->max_count);
     }
 
     /**

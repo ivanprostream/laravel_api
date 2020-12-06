@@ -31,10 +31,10 @@ class WalletController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): object
     {
-        $wallets = $this->user->wallets()->get(['id', 'name', 'amount']);
-        return new WalletListResource();
+        $wallets = $this->walletService->walletList();
+        return new WalletListResource($wallets);
     }
 
     /**
@@ -43,10 +43,9 @@ class WalletController extends Controller
      * @param  \Illuminate\Http\Requests\WalletRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(WalletFormRequest  $request)
+    public function store(WalletFormRequest $request)
     {   
-        $walletStore =  $this->walletService->walletStore($request, $this->user);
-        return $walletStore;
+        return $this->walletService->walletStore($request);
     }
 
     /**
@@ -55,7 +54,7 @@ class WalletController extends Controller
      * @param  \App\Models\Wallet  $wallet
      * @return \Illuminate\Http\Response
      */
-    public function show(Wallet $wallet)
+    public function show(Wallet $wallet) : object
     {
         return new WalletShowResource($wallet);
     }
@@ -69,8 +68,7 @@ class WalletController extends Controller
      */
     public function update(WalletItemRequest $request, Wallet $wallet)
     {
-        $walletUpdate = $this->walletService->walletUpdate($request, $wallet);
-        return $walletUpdate;
+        return $this->walletService->walletUpdate($request, $wallet);
     }
 
     /**
@@ -81,15 +79,13 @@ class WalletController extends Controller
      */
     public function destroy(Wallet $wallet)
     {
-        $walletDestroy = $this->walletService->walletDestroy($wallet->delete());
-        return $walletDestroy;
+        return $this->walletService->walletDestroy($wallet->delete());
     }
 
 
-    public function transactions($id)
+    public function transactions(int $id) : object
     {
-        $walletTransactions = $this->walletService->TransactionsByWallet($id);
-        return $walletTransactions;
+        return $this->walletService->TransactionsByWallet($id);
     }
 
     public function guard()
