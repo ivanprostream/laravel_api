@@ -29,7 +29,7 @@ class TransactionController extends Controller
      */
     public function index(): object
     {
-        $transactions = Transaction::paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
+        $transactions = $this->transactionService->transactionList();
         new TransactionResource($transactions);
     }
 

@@ -12,6 +12,12 @@ use App\Exceptions\InsufficientBalanceException;
 
 class TransactionService
 {
+
+    public function transactionList()
+    {
+        return Transaction::paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
+    }
+
     public function transactionStore($request, $user): void
     {
 
