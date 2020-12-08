@@ -18,7 +18,7 @@ class TransactionService
         return Transaction::orderBy('created_at','desc')->paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
     }
 
-    public function transactionStore($request): object
+    public function transactionStore($request)
     {
 
         DB::beginTransaction();
@@ -53,12 +53,10 @@ class TransactionService
             ]);
 
             if($transferFee == true){
-                Fee::create(
-                    array_merge(
-                        $request->only('transaction_id'),
-                        ['amount' => $this->getFeeFromSumm($amount)]
-                    )
-                );
+                Fee::create([
+                    'transaction_id' => $transaction->id,
+                    'amount' => $amount - $request['summ'],
+                ]);
             }
 
             DB::commit();
@@ -78,21 +76,6 @@ class TransactionService
         $FeeFromSumm = $amount * $fee->fee / 100;
 
         return $amount + $FeeFromSumm;
-    }
-
-    /**
-     * get Fee from summ
-     *
-     * @param $amount
-     * @return string
-     */
-
-    public function getFeeFromSumm(int $amount) : int
-    {
-        $fee = Setting::first();
-        $FeeFromSumm = $amount * $fee->fee / 100;
-
-        return $FeeFromSumm;
     }
 
 }
