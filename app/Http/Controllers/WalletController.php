@@ -36,7 +36,7 @@ class WalletController extends Controller
     public function index(): WalletListResourceCollection
     {
         $wallets = $this->walletService->walletList();
-        return new WalletListResourceCollection($wallets);
+        return (new WalletListResourceCollection($wallets))->additional(['message' => 'Wallet List!']);
     }
 
     /**
@@ -48,7 +48,7 @@ class WalletController extends Controller
     public function store(WalletFormRequest $request) : WalletStoreResource
     {   
         $wallet = $this->walletService->walletStore($request);
-        return new WalletStoreResource($wallet);
+        return (new WalletStoreResource($wallet))->additional(['message' => 'Wallet created!']);
     }
 
     /**
@@ -59,7 +59,7 @@ class WalletController extends Controller
      */
     public function show(Wallet $wallet): WalletShowResource
     {
-        return new WalletShowResource($wallet);
+        return (new WalletShowResource($wallet))->additional(['message' => 'Wallet info!']);
     }
 
     /**
@@ -89,7 +89,7 @@ class WalletController extends Controller
     public function transactions(int $id): TransactionResourceCollection
     {
         $transactions = $this->walletService->TransactionsByWallet($id);
-        return new TransactionResourceCollection($transactions);
+        return (new TransactionResourceCollection($transactions))->additional(['message' => 'Transaction by wallet!']);
     }
 
     public function guard()

@@ -30,7 +30,7 @@ class TransactionController extends Controller
     public function index(): TransactionResourceCollection
     {
         $transactions = $this->transactionService->transactionList();
-        return new TransactionResourceCollection($transactions);
+        return (new TransactionResourceCollection($transactions))->additional(['message' => 'Transactions list!']);
     }
 
     /**
@@ -42,7 +42,7 @@ class TransactionController extends Controller
     public function store(TransactionRequest $request): TransactionStoreResource
     {
         $transaction = $this->transactionService->transactionStore($request);
-        return new TransactionStoreResource($transaction);
+        return (new TransactionStoreResource($transaction))->additional(['message' => 'Transaction created!']);
     }
 
     public function guard()

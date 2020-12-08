@@ -18,7 +18,7 @@ class TransactionService
         return Transaction::orderBy('created_at','desc')->paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
     }
 
-    public function transactionStore($request)
+    public function transactionStore($request): object
     {
 
         DB::beginTransaction();

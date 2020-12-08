@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Services\GeneralService;
 
-
 class WalletShowResource extends JsonResource
 {
 
@@ -17,13 +16,14 @@ class WalletShowResource extends JsonResource
      */
     public function toArray($request)
     {
-        $convertTo = new GeneralService;
+        $generalService = resolve(GeneralService::class);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'amount' => $this->amount,
-            'convertToUSD' => $convertTo->convertTo($this->amount, "USD"),
-            'convertToBTC' => $convertTo->convertToBtc($this->amount, "USD")
+            'convertToUSD' => $generalService->convertTo($this->amount, "USD"),
+            'convertToBTC' => $generalService->convertToBtc($this->amount, "USD")
         ];
     }
 }

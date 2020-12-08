@@ -20,6 +20,6 @@ class UserController extends Controller
     public function store(UserFormRequest $request): UserStoreResource
     {
         $user = $this->userService->createUser($request);
-        return new UserStoreResource($user);
+        return (new UserStoreResource($user))->additional(['message' => 'User created!']);
     }
 }
