@@ -35,7 +35,7 @@ class WalletFormRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|unique:wallets',
+            'name' => 'required|string|min:3',
         ];
     }
 

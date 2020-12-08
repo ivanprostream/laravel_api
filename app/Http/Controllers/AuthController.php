@@ -41,7 +41,6 @@ class AuthController extends Controller
     public function profile(): object
     {
         return response()->json($this->guard()->user());
-
     }
 
 
@@ -52,7 +51,7 @@ class AuthController extends Controller
     }
 
 
-    protected function respondWithToken($token): array
+    protected function respondWithToken($token): object
     {
         return response()->json(
             [

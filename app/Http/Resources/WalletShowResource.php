@@ -19,6 +19,7 @@ class WalletShowResource extends JsonResource
     {
         $convertTo = new GeneralService;
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'amount' => $this->amount,
             'convertToUSD' => $convertTo->convertTo($this->amount, "USD"),

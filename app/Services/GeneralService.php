@@ -17,14 +17,14 @@ class GeneralService
      * @return string
      */
 
-    function convertTo($amount, $currency): string
+    public function convertTo(int $amount, string $currency): string
     {
         $setting = Setting::first();
         $convertTo = $amount * $setting->conversion / 100000000;
         return $amount.' Satoshi = '.$convertTo.' '.$currency;
     }
 
-    function convertToBtc($amount, $currency): string
+    public function convertToBtc(int $amount, string $currency): string
     {
         $convertToBtc = $amount / 100000000;
         return $amount.' Satoshi = '.$convertToBtc.' Bitcoins';

@@ -13,12 +13,12 @@ use App\Exceptions\InsufficientBalanceException;
 class TransactionService
 {
 
-    public function transactionList()
+    public function transactionList(): object
     {
-        return Transaction::paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
+        return Transaction::orderBy('created_at','desc')->paginate(\Config::get('constants.PAGINATION_PER_PAGE'));
     }
 
-    public function transactionStore($request, $user): void
+    public function transactionStore($request): object
     {
 
         DB::beginTransaction();
@@ -41,13 +41,16 @@ class TransactionService
             }
 
             $toQuery->increment('amount', $amount);
-            $fromQuery->decrement('amount' , $amount); 
+            
+            $fromAccount = $fromQuery;
+            $fromAccount->amount -= $amount;
+            $fromAccount->save();
 
-            $transaction = new Transaction();
-            $transaction->created_by = $fromQuery->created_by;
-            $transaction->wallet_id = $toQuery->id;
-            $transaction->amount = $amount;
-            $transaction->save();
+            $transaction = Transaction::create([
+                'created_by' => Auth::user()->id,
+                'wallet_id'  => $request['wallet_to'],
+                'amount'     => $amount,
+            ]);
 
             if($transferFee == true){
                 Fee::create(
@@ -60,6 +63,8 @@ class TransactionService
 
             DB::commit();
 
+            return $transaction;
+
         } catch (\Exception $e) {
             DB::rollback();
             return $e->getMessage();
@@ -67,7 +72,7 @@ class TransactionService
 
     }
 
-    public function calculateSummWithFee($amount) : int
+    public function calculateSummWithFee(int $amount) : int
     {
         $fee = Setting::first();
         $FeeFromSumm = $amount * $fee->fee / 100;
@@ -82,7 +87,7 @@ class TransactionService
      * @return string
      */
 
-    function getFeeFromSumm($amount) : int
+    public function getFeeFromSumm(int $amount) : int
     {
         $fee = Setting::first();
         $FeeFromSumm = $amount * $fee->fee / 100;

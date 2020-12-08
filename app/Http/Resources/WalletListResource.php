@@ -14,6 +14,11 @@ class WalletListResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'amount' => $this->amount,
+            'url' => route('wallets.show', $this->id)
+        ];
     }
 }

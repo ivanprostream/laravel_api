@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\TransactionRequest;
-use App\Http\Resources\TransactionResource;
+use App\Http\Resources\TransactionResourceCollection;
 use App\Http\Resources\TransactionStoreResource;
 use App\Services\TransactionService;
 
@@ -27,10 +27,10 @@ class TransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): object
+    public function index(): TransactionResourceCollection
     {
         $transactions = $this->transactionService->transactionList();
-        new TransactionResource($transactions);
+        return new TransactionResourceCollection($transactions);
     }
 
     /**
@@ -39,9 +39,10 @@ class TransactionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(TransactionRequest $request): void
+    public function store(TransactionRequest $request): TransactionStoreResource
     {
-        $this->transactionService->transactionStore($request, $this->user->id);
+        $transaction = $this->transactionService->transactionStore($request);
+        return new TransactionStoreResource($transaction);
     }
 
     public function guard()
